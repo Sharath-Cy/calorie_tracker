@@ -7,6 +7,7 @@ class Food {
   final double fat;
   final bool isCustom;
   final bool isFavorite;
+  final String? barcode;
 
   Food({
     this.id,
@@ -17,6 +18,7 @@ class Food {
     required this.fat,
     this.isCustom = false,
     this.isFavorite = false,
+    this.barcode,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +31,7 @@ class Food {
       'fat': fat,
       'isCustom': isCustom ? 1 : 0,
       'isFavorite': isFavorite ? 1 : 0,
+      'barcode': barcode,
     };
   }
 
@@ -42,6 +45,7 @@ class Food {
       fat: map['fat'],
       isCustom: map['isCustom'] == 1,
       isFavorite: map['isFavorite'] == 1,
+      barcode: map['barcode'],
     );
   }
 }

@@ -20,7 +20,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDatabase,
       onUpgrade: _onUpgrade,
     );
@@ -37,6 +37,7 @@ CREATE TABLE foods(
   fat REAL NOT NULL,
   isCustom INTEGER NOT NULL,
   isFavorite INTEGER NOT NULL DEFAULT 0
+  barcode TEXT
 )
   ''');
     await db.execute('''
@@ -64,6 +65,10 @@ mealType TEXT NOT NULL
       await db.execute(
         'ALTER TABLE foods ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0',
       );
+    }
+
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE foods ADD COLUMN barcode TEXT');
     }
   }
 
@@ -125,6 +130,23 @@ mealType TEXT NOT NULL
     );
 
     return result.isNotEmpty;
+  }
+
+  static Future<Food?> getFoodByBarcode(String barcode) async {
+    final db = await database;
+
+    final result = await db.query(
+      'foods',
+      where: 'barcode = ?',
+      whereArgs: [barcode],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return Food.fromMap(result.first);
   }
 
   static Future<int> insertTodayMeal(TodayMeal meal) async {

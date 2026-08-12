@@ -32,4 +32,8 @@ class FoodService {
   static Future<bool> foodExists(String name, {int? excludeId}) async {
     return await DatabaseService.foodExists(name, excludeId: excludeId);
   }
+
+  static Future<Food?> getFoodByBarcode(String barcode) async {
+    return await DatabaseService.getFoodByBarcode(barcode);
+  }
 }

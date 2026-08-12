@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import '../services/open_food_facts_service.dart';
+import 'review_food_screen.dart';
+import '../services/food_service.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -85,6 +88,96 @@ class _ScannerScreenState extends State<ScannerScreen> {
       });
 
       await _controller?.stopImageStream();
+
+      final existingFood = await FoodService.getFoodByBarcode(value);
+
+      debugPrint("========== BARCODE CHECK ==========");
+      debugPrint("Scanned barcode: $value");
+      debugPrint("Existing food: ${existingFood?.name ?? 'NOT FOUND'}");
+      debugPrint("===================================");
+
+      if (existingFood != null) {
+        if (!mounted) return;
+
+        await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Food Already Exists"),
+              content: Text("${existingFood.name} is already in your foods."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+
+        return;
+      }
+      final product = await OpenFoodFactsService.getProduct(value);
+
+      if (!mounted) return;
+
+      if (product == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Product not found in Open Food Facts."),
+          ),
+        );
+        return;
+      }
+
+      final productName = product['product_name'] ?? 'Unknown product';
+
+      final nutriments = product['nutriments'] as Map<String, dynamic>? ?? {};
+
+      debugPrint("========== NUTRIMENTS ==========");
+      debugPrint(nutriments.toString());
+      debugPrint("================================");
+
+      final calories = nutriments['energy-kcal_100g'];
+      final protein = nutriments['proteins_100g'];
+      final carbs = nutriments['carbohydrates_100g'];
+      final fat = nutriments['fat_100g'];
+
+      final parsedCalories = (calories as num?)?.round() ?? 0;
+      final parsedProtein = (protein as num?)?.toDouble() ?? 0;
+      final parsedCarbs = (carbs as num?)?.toDouble() ?? 0;
+      final parsedFat = (fat as num?)?.toDouble() ?? 0;
+
+      if (!mounted) return;
+
+      final food = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReviewFoodScreen(
+            name: productName,
+            calories: parsedCalories,
+            protein: parsedProtein,
+            carbs: parsedCarbs,
+            fat: parsedFat,
+            barcode: value,
+          ),
+        ),
+      );
+
+      if (!mounted) return;
+      if (food != null) {
+        await FoodService.addFood(food);
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${food.name} added successfully!")),
+        );
+
+        Navigator.pop(context);
+      }
     } catch (e) {
       debugPrint("Barcode scanning error: $e");
     } finally {
