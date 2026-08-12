@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/food_service.dart';
 import 'food_form_screen.dart';
 import '../models/food.dart';
+import 'food_form_screen.dart';
+import 'scanner_screen.dart';
 
 class ManageFoodsScreen extends StatefulWidget {
   const ManageFoodsScreen({super.key});
@@ -46,7 +48,23 @@ class _ManageFoodsScreenState extends State<ManageFoodsScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      appBar: AppBar(title: const Text("Manage Foods")),
+      appBar: AppBar(
+        title: const Text("Manage Foods"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: "Scan Food",
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ScannerScreen()),
+              );
+
+              await loadFoods();
+            },
+          ),
+        ],
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.only(bottom: 90),
         itemCount: foods.length,
