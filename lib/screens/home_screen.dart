@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/nutrition_card.dart';
 import '../widgets/meal_summary_card.dart';
-import '../models/nutrition_result.dart';
 import '../models/goals.dart';
 import 'settings_screen.dart';
 import 'meal_detail_screen.dart';
@@ -150,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
               value:
                   "${totalCalories.toStringAsFixed(0)} / ${goals.calories} kcal",
               progress: totalCalories / goals.calories,
+              isCalories: true,
             ),
 
             NutritionCard(
