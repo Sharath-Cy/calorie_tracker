@@ -3,20 +3,22 @@ import '../models/food.dart';
 
 class ReviewFoodScreen extends StatefulWidget {
   final String name;
-  final int calories;
-  final double protein;
-  final double carbs;
-  final double fat;
+  final int? calories;
+  final double? protein;
+  final double? carbs;
+  final double? fat;
   final String? barcode;
+  final String nutritionBasis;
 
   const ReviewFoodScreen({
     super.key,
     required this.name,
-    required this.calories,
-    required this.protein,
-    required this.carbs,
-    required this.fat,
+    this.calories,
+    this.protein,
+    this.carbs,
+    this.fat,
     this.barcode,
+    this.nutritionBasis = '100g',
   });
 
   @override
@@ -35,12 +37,20 @@ class _ReviewFoodScreenState extends State<ReviewFoodScreen> {
     super.initState();
 
     nameController = TextEditingController(text: widget.name);
+
     caloriesController = TextEditingController(
-      text: widget.calories.toString(),
+      text: widget.calories?.toString() ?? '',
     );
-    proteinController = TextEditingController(text: widget.protein.toString());
-    carbsController = TextEditingController(text: widget.carbs.toString());
-    fatController = TextEditingController(text: widget.fat.toString());
+
+    proteinController = TextEditingController(
+      text: widget.protein?.toString() ?? '',
+    );
+
+    carbsController = TextEditingController(
+      text: widget.carbs?.toString() ?? '',
+    );
+
+    fatController = TextEditingController(text: widget.fat?.toString() ?? '');
   }
 
   @override
@@ -80,6 +90,7 @@ class _ReviewFoodScreenState extends State<ReviewFoodScreen> {
       fat: fat,
       isCustom: true,
       barcode: widget.barcode,
+      nutritionBasis: widget.nutritionBasis,
     );
   }
 
@@ -107,12 +118,45 @@ class _ReviewFoodScreenState extends State<ReviewFoodScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final basisLabel = "/ ${widget.nutritionBasis}";
+
     return Scaffold(
       appBar: AppBar(title: const Text("Review Food")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            if (widget.calories == null ||
+                widget.protein == null ||
+                widget.carbs == null ||
+                widget.fat == null)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "Some nutrition values couldn't be detected automatically. "
+                        "Please check the values below and enter any missing values.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
@@ -126,26 +170,26 @@ class _ReviewFoodScreenState extends State<ReviewFoodScreen> {
             _nutritionField(
               label: "Calories",
               controller: caloriesController,
-              suffix: "kcal / 100g",
+              suffix: "kcal $basisLabel",
               keyboardType: TextInputType.number,
             ),
 
             _nutritionField(
               label: "Protein",
               controller: proteinController,
-              suffix: "g / 100g",
+              suffix: "g $basisLabel",
             ),
 
             _nutritionField(
               label: "Carbohydrates",
               controller: carbsController,
-              suffix: "g / 100g",
+              suffix: "g $basisLabel",
             ),
 
             _nutritionField(
               label: "Fat",
               controller: fatController,
-              suffix: "g / 100g",
+              suffix: "g $basisLabel",
             ),
 
             const SizedBox(height: 10),

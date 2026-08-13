@@ -20,7 +20,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _createDatabase,
       onUpgrade: _onUpgrade,
     );
@@ -36,8 +36,9 @@ CREATE TABLE foods(
   carbs REAL NOT NULL,
   fat REAL NOT NULL,
   isCustom INTEGER NOT NULL,
-  isFavorite INTEGER NOT NULL DEFAULT 0
-  barcode TEXT
+  isFavorite INTEGER NOT NULL DEFAULT 0,
+  barcode TEXT,
+  nutritionBasis TEXT NOT NULL DEFAULT '100g'
 )
   ''');
     await db.execute('''
@@ -69,6 +70,11 @@ mealType TEXT NOT NULL
 
     if (oldVersion < 4) {
       await db.execute('ALTER TABLE foods ADD COLUMN barcode TEXT');
+    }
+    if (oldVersion < 5) {
+      await db.execute(
+        "ALTER TABLE foods ADD COLUMN nutritionBasis TEXT NOT NULL DEFAULT '100g'",
+      );
     }
   }
 

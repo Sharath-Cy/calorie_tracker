@@ -71,10 +71,10 @@ class _FoodFormScreenState extends State<FoodFormScreen> {
                   double? protein = double.tryParse(proteinController.text);
                   double? carbs = double.tryParse(carbsController.text);
                   double? fat = double.tryParse(fatController.text);
-                  if (name.length > 30) {
+                  if (name.length > 60) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text("Food name cannot exceed 30 characters."),
+                        content: Text("Food name cannot exceed 60 characters."),
                       ),
                     );
                     return;
